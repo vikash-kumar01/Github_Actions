@@ -6,6 +6,7 @@ output "bastion_public_ip" {
 }
 
 output "bastion_ssh_key" {
-  description = "SSH Key for the Bastion Host"
-  value       = aws_key_pair.bastion_key.key_name
+  description = "SSH Private Key for Bastion Access"
+  value       = tls_private_key.bastion_key.private_key_pem
+  sensitive   = true
 }
