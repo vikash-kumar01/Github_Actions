@@ -1,4 +1,4 @@
-# main.tf
+# main.tf file
 
 # Retrieve available availability zones
 data "aws_availability_zones" "available" {
