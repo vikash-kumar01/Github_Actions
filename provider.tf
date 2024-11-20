@@ -1,7 +1,7 @@
 # provider.tf
 
 provider "aws" {
-  region = var.region
+  region = "ap-south-1"
 }
 
 # Remote backend configuration (using S3 and DynamoDB for state locking)
@@ -9,8 +9,7 @@ terraform {
   backend "s3" {
     bucket         = "mir-terraform-s3-bucket"
     key            = "key/terraform.tfstate"
-    region         = var.region
-    dynamodb_table = "dynamodb-state-locking"
-    encrypt        = true
+    region         = "ap-south-1"
+    dynamodb_table = "dynamodb-state-locking"    
   }
 }
