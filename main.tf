@@ -33,10 +33,11 @@ resource "aws_internet_gateway" "igw" {
 # Create EKS Cluster
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
+  version         = ">= 18.0.0" # Make sure to use the correct version of the EKS module
   cluster_name    = var.cluster_name
   cluster_version = "1.30"
-  subnets         = aws_subnet.private[*].id
   vpc_id          = aws_vpc.main.id
+  subnet_ids      = aws_subnet.private[*].id  # Use 'subnet_ids' instead of 'subnets'
   tags = {
     Name = var.cluster_name
   }
@@ -49,8 +50,8 @@ resource "aws_key_pair" "bastion_key" {
 }
 
 resource "aws_instance" "bastion" {
-  ami                    = "ami-0aebec83a182ea7ea" # Amazon Linux 2 AMI
-  instance_type          = "t2.micro"
+  ami                    = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI
+  instance_type          = "t3.micro"
   subnet_id              = aws_subnet.private[0].id
   associate_public_ip_address = true
   key_name               = aws_key_pair.bastion_key.key_name
