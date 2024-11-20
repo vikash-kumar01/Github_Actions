@@ -1,5 +1,10 @@
 # main.tf
 
+# Retrieve available availability zones
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 # VPC Configuration
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
@@ -33,20 +38,26 @@ resource "aws_internet_gateway" "igw" {
 # Create EKS Cluster
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  version         = ">= 18.0.0" # Make sure to use the correct version of the EKS module
+  version         = ">= 18.0.0" # Adjust version if necessary
   cluster_name    = var.cluster_name
   cluster_version = "1.30"
   vpc_id          = aws_vpc.main.id
-  subnet_ids      = aws_subnet.private[*].id  # Use 'subnet_ids' instead of 'subnets'
+  subnet_ids      = aws_subnet.private[*].id  # Use 'subnet_ids'
   tags = {
     Name = var.cluster_name
   }
 }
 
+# Generate SSH Key Pair if not exists
+resource "tls_private_key" "bastion_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
 # EC2 Bastion Host Configuration
 resource "aws_key_pair" "bastion_key" {
   key_name   = "bastion-key"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = tls_private_key.bastion_key.public_key_openssh
 }
 
 resource "aws_instance" "bastion" {
