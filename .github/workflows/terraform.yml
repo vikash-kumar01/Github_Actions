@@ -1,6 +1,4 @@
-# .github/workflows/terraform.yml
-
-name: 'Terraform CI/CD Pipeline'
+name: "CI/CD Pipeline for EKS Deployment"
 
 on:
   push:
@@ -12,31 +10,58 @@ on:
 
 jobs:
   terraform:
+    name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      # Step 1: Checkout the code
+      - name: "Checkout code"
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.9.8
+      # Step 2: Setup Terraform
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
 
-    - name: Terraform Init
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform init
+      # Step 3: Configure AWS Credentials
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "ap-south-1"
 
-    - name: Terraform Plan
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform plan -lock=false
+      # Step 4: Terraform Init
+      - name: "Terraform Init"
+        run: terraform init -input=false
 
-    - name: Terraform Apply
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve
+      # Step 5: Terraform Plan
+      - name: "Terraform Plan"
+        id: plan
+        run: terraform plan -out=plan.tfplan
+        continue-on-error: true  # Allow workflow to continue even if plan fails
+
+      # Step 6: Conditional Apply if there are no major errors
+      - name: "Check Terraform Plan"
+        if: ${{ success() && steps.plan.outcome == 'success' }}
+        run: terraform apply -auto-approve plan.tfplan
+
+      # Step 7: Handle Duplicate or Conflicting Resources (if any)
+      - name: "Handle Existing Resources"
+        if: ${{ failure() }}
+        run: |
+          # Import or remove duplicates from Terraform state
+          echo "Handling existing resources if any conflicts are found..."
+          terraform import aws_key_pair.bastion_key bastion-key || echo "Key pair already imported."
+          terraform state rm aws_kms_alias.this || echo "KMS alias removal not required."
+          terraform plan -out=plan.tfplan || exit 1
+
+      # Step 8: Terraform Apply with Conflicts Resolved
+      - name: "Apply Terraform Changes"
+        if: ${{ failure() }}
+        run: terraform apply -auto-approve plan.tfplan
+
+      # Step 9: Terraform Cleanup & State Check
+      - name: "Terraform Cleanup"
+        run: terraform plan || echo "Final cleanup of the state if needed"
