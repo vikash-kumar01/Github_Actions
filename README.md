@@ -3,6 +3,7 @@
 This guide provides a comprehensive walkthrough for setting up a GitOps workflow. It uses **Terraform** and **GitHub Actions** to automate infrastructure provisioning on **AWS EKS** and leverages **ArgoCD** for automating application deployments.
 
 [![LinkedIn](https://img.shields.io/badge/Connect%20with%20me%20on-LinkedIn-blue.svg)](https://www.linkedin.com/in/mir-owahed-ali-8786a8153/)
+
 [![YouTube](https://img.shields.io/badge/Subscribe%20to-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCE0wN4DnpNaAQ7duTMpHJ5Q)
 
 
