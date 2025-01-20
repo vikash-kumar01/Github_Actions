@@ -327,3 +327,7 @@ GitHub Actions will:
 ---
 
 By following this guide, you now have a fully automated GitOps pipeline using **Terraform**, **GitHub Actions**, and **ArgoCD**. Your EKS infrastructure is provisioned, and application deployments are automated through ArgoCD.
+---
+## 📝 Comprehensive Guide
+For a detailed guide, please refer to the [Youtube video](https://youtu.be/dy1CkxQv0SM).
+---
