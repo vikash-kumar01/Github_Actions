@@ -21,6 +21,27 @@ resource "aws_route_table" "main" {
   }
 }
 
+resource "aws_subnet" "subnet_1" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_subnet" "subnet_2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_subnet" "subnet_3" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.3.0/24"
+  availability_zone       = "us-east-1c"
+  map_public_ip_on_launch = true
+}
+
 resource "aws_route_table_association" "subnet_1_association" {
   subnet_id      = aws_subnet.subnet_1.id
   route_table_id = aws_route_table.main.id
@@ -36,55 +57,14 @@ resource "aws_route_table_association" "subnet_3_association" {
   route_table_id = aws_route_table.main.id
 }
 
-resource "aws_subnet" "subnet_1" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "ap-south-1a"
-  map_public_ip_on_launch = true
-}
+resource "aws_instance" "my_ec2_instance" {
+  ami                         = "ami-0f58c7d8cda0a0e20" # Replace with a valid AMI ID
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.subnet_1.id
+  associate_public_ip_address = true
+  key_name                    = "mrdevops"         # Set your existing key name for SSH access
 
-resource "aws_subnet" "subnet_2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "ap-south-1b"
-  map_public_ip_on_launch = true
-}
-
-resource "aws_subnet" "subnet_3" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.3.0/24"
-  availability_zone       = "ap-south-1c"
-  map_public_ip_on_launch = true
-}
-
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
-
-  cluster_name    = "eks-cluster"
-  cluster_version = "1.31"
-
-  cluster_endpoint_public_access = true
-
-  cluster_addons = {
-    coredns                = {}
-    eks-pod-identity-agent = {}
-    kube-proxy             = {}
-    vpc-cni                = {}
-  }
-
-  vpc_id                   = aws_vpc.main.id
-  subnet_ids               = [aws_subnet.subnet_1.id, aws_subnet.subnet_2.id, aws_subnet.subnet_3.id]
-  control_plane_subnet_ids = [aws_subnet.subnet_1.id, aws_subnet.subnet_2.id, aws_subnet.subnet_3.id]
-
-  eks_managed_node_groups = {
-    green = {
-      ami_type       = "AL2023_x86_64_STANDARD"
-      instance_types = ["m5.xlarge"]
-
-      min_size     = 1
-      max_size     = 1
-      desired_size = 1
-    }
+  tags = {
+    Name = "MyEC2Instance"
   }
 }
