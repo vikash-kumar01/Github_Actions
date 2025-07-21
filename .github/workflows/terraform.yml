@@ -42,16 +42,16 @@ jobs:
       - name: Git Checkout Code
         uses: actions/checkout@v2
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.6
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v2
+      #   with:
+      #     terraform_version: 1.5.6
 
       - name: Install Terragrunt
         run: |
-          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.56.3/terragrunt_linux_amd64
+          wget https://github.com/gruntwork-io/terragrunt/releases/latest/download/terragrunt_linux_amd64
           chmod +x terragrunt_linux_amd64
-          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -60,29 +60,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Initialize Terraform
-        working-directory: live/${{ github.event.inputs.environment }}
-        run: terragrunt run init --experiment cli-redesign
-
-
       - name: Run Terragrunt Task
         working-directory: live/${{ github.event.inputs.environment }}
         run: |
           case "${{ github.event.inputs.action }}" in
+            init)
+              terragrunt init --terragrunt-experimental-cli
+              ;;
             plan)
-              terragrunt run plan --experiment cli-redesign
+              terragrunt plan --terragrunt-experimental-cli -out=tfplan
               ;;
             apply)
-              terragrunt run apply --auto-approve --experiment cli-redesign
+              terragrunt apply --auto-approve --terragrunt-experimental-cli tfplan
               ;;
             destroy)
-              terragrunt run destroy --auto-approve --experiment cli-redesign
+              terragrunt destroy --auto-approve --terragrunt-experimental-cli
               ;;
             validate)
-              terragrunt run validate --experiment cli-redesign
+              terragrunt validate --terragrunt-experimental-cli
               ;;
             refresh)
-              terragrunt run refresh --experiment cli-redesign
+              terragrunt refresh --terragrunt-experimental-cli
               ;;
             *)
               echo "Unknown action: ${{ github.event.inputs.action }}"
