@@ -62,27 +62,27 @@ jobs:
 
       - name: Initialize Terraform
         working-directory: live/${{ github.event.inputs.environment }}
-        run: terraform init
+        run: terragrunt run init --experiment cli-redesign
 
 
-      - name: Run Terraform Task
+      - name: Run Terragrunt Task
         working-directory: live/${{ github.event.inputs.environment }}
         run: |
           case "${{ github.event.inputs.action }}" in
             plan)
-              terraform plan -out=tfplan
+              terragrunt run plan --experiment cli-redesign
               ;;
             apply)
-              terraform apply -auto-approve tfplan
+              terragrunt run apply --auto-approve --experiment cli-redesign
               ;;
             destroy)
-              terraform destroy -auto-approve
+              terragrunt run destroy --auto-approve --experiment cli-redesign
               ;;
             validate)
-              terraform validate
+              terragrunt run validate --experiment cli-redesign
               ;;
             refresh)
-              terraform refresh
+              terragrunt run refresh --experiment cli-redesign
               ;;
             *)
               echo "Unknown action: ${{ github.event.inputs.action }}"
