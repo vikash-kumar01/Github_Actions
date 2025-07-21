@@ -1,5 +1,5 @@
 resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
 }
 
@@ -16,29 +16,29 @@ resource "aws_route_table" "main" {
   }
 
   route {
-    cidr_block = "10.0.0.0/16"
+    cidr_block = var.vpc_cidr
     gateway_id = "local"
   }
 }
 
 resource "aws_subnet" "subnet_1" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
+  cidr_block              = var.subnet_1_cidr
+  availability_zone       = var.az1
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
+  cidr_block              = var.subnet_2_cidr
+  availability_zone       = var.az2
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_3" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.3.0/24"
-  availability_zone       = "us-east-1c"
+  cidr_block              = var.subnet_3_cidr
+  availability_zone       = var.az3
   map_public_ip_on_launch = true
 }
 
@@ -58,11 +58,11 @@ resource "aws_route_table_association" "subnet_3_association" {
 }
 
 resource "aws_instance" "my_ec2_instance" {
-  ami                         = "ami-0f58c7d8cda0a0e20" # Replace with a valid AMI ID
-  instance_type               = "t2.micro"
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
   subnet_id                   = aws_subnet.subnet_1.id
   associate_public_ip_address = true
-  key_name                    = "mrdevops"         # Set your existing key name for SSH access
+  key_name                    = var.key_name
 
   tags = {
     Name = "MyEC2Instance"

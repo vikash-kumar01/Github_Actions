@@ -1,0 +1,11 @@
+variable "aws_region" {}
+variable "vpc_cidr" {}
+variable "subnet_1_cidr" {}
+variable "subnet_2_cidr" {}
+variable "subnet_3_cidr" {}
+variable "az1" {}
+variable "az2" {}
+variable "az3" {}
+variable "ami_id" {}
+variable "instance_type" {}
+variable "key_name" {}
