@@ -68,22 +68,22 @@ jobs:
         run: |
           case "${{ github.event.inputs.action }}" in
             init)
-              terragrunt --terragrunt-experimental-cli init
+              terragrunt init --terragrunt-experimental-cli
               ;;
             plan)
-              terragrunt --terragrunt-experimental-cli plan -out=tfplan
+              terragrunt plan --terragrunt-experimental-cli -out=tfplan
               ;;
             apply)
-              terragrunt --terragrunt-experimental-cli apply -auto-approve tfplan
+              terragrunt apply --terragrunt-experimental-cli -auto-approve tfplan
               ;;
             destroy)
-              terragrunt --terragrunt-experimental-cli destroy -auto-approve
+              terragrunt destroy --terragrunt-experimental-cli -auto-approve
               ;;
             validate)
-              terragrunt --terragrunt-experimental-cli validate
+              terragrunt validate --terragrunt-experimental-cli
               ;;
             refresh)
-              terragrunt --terragrunt-experimental-cli refresh
+              terragrunt refresh --terragrunt-experimental-cli
               ;;
             *)
               echo "Unknown action: ${{ github.event.inputs.action }}"
